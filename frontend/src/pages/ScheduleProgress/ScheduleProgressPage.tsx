@@ -14,6 +14,7 @@ import { useReverseGeocode } from '@/hooks/useReverseGeocode';
 import { LocationMapPreview } from '@/components/common/LocationMapPreview';
 import { ScheduleCompletedModal } from '@/components/common/ScheduleCompletedModal';
 import { ScheduleCompletedModalDesktop } from '@/components/common/ScheduleCompletedModalDesktop';
+import { AddTaskForm } from '@/components/common/AddTaskForm';
 import type { Task } from '@/types';
 
 export const ScheduleProgressPage: React.FC = () => {
@@ -35,6 +36,7 @@ export const ScheduleProgressPage: React.FC = () => {
   const [manualLat, setManualLat] = useState('');
   const [manualLng, setManualLng] = useState('');
   const [showCompletedModal, setShowCompletedModal] = useState(false);
+  const [showAddTaskForm, setShowAddTaskForm] = useState(false);
 
   const fallbackLatitude = useMemo(() => {
     const manual = manualLat ? Number(manualLat) : undefined;
@@ -323,20 +325,52 @@ export const ScheduleProgressPage: React.FC = () => {
                 </div>
               );
             })}
+            
+            {/* Add New Task Form */}
+            {showAddTaskForm && (
+              <AddTaskForm
+                scheduleId={scheduleId}
+                onCancel={() => setShowAddTaskForm(false)}
+                onSuccess={() => {
+                  setShowAddTaskForm(false);
+                  // Refetch to get the updated schedule with new task
+                  void refetch();
+                }}
+              />
+            )}
           </div>
 
-          {/* Add New Task - Mobile Only */}
-          <div className="md:hidden mt-4 px-4">
-            <button
-              type="button"
-              className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              <span className="text-xl font-bold" style={{ color: '#02CAD1' }}>
-                +
-              </span>
-              <span className="text-sm font-medium">Add new task</span>
-            </button>
-          </div>
+          {/* Add New Task Button - Mobile Only */}
+          {!showAddTaskForm && (
+            <div className="md:hidden mt-4 px-4">
+              <button
+                type="button"
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
+                onClick={() => setShowAddTaskForm(true)}
+              >
+                <span className="text-xl font-bold" style={{ color: '#02CAD1' }}>
+                  +
+                </span>
+                <span className="text-sm font-medium">Add new task</span>
+              </button>
+            </div>
+          )}
+          
+          {/* Add New Task Button - Desktop */}
+          {!showAddTaskForm && (
+            <div className="hidden md:block mt-4">
+              <button
+                type="button"
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                onClick={() => setShowAddTaskForm(true)}
+              >
+                <span className="text-xl font-bold" style={{ color: '#02CAD1' }}>
+                  +
+                </span>
+                <span className="text-sm font-medium">Add new task</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Clock-In Location */}
