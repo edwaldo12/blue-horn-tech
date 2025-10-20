@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import clsx from 'clsx';
 import type {
   ScheduleDetail,
@@ -44,48 +45,48 @@ const getPrimaryButtonLayout = (
     : 'w-full px-4 py-3 rounded-lg font-medium text-sm transition-colors';
 };
 
-export const ScheduleActionButtons: React.FC<ScheduleActionButtonsProps> = ({
-  schedule,
-  primaryAction,
-  secondaryAction,
-}) => {
-  const showSecondaryButton = shouldShowSecondaryButton(schedule.status);
-  const hasActions = primaryAction || secondaryAction;
+export const ScheduleActionButtons: React.FC<ScheduleActionButtonsProps> = memo(
+  ({ schedule, primaryAction, secondaryAction }) => {
+    const showSecondaryButton = shouldShowSecondaryButton(schedule.status);
+    const hasActions = primaryAction || secondaryAction;
 
-  if (!hasActions) {
-    return null;
+    if (!hasActions) {
+      return null;
+    }
+
+    return (
+      <div className="flex gap-3">
+        {secondaryAction && showSecondaryButton && (
+          <button
+            type="button"
+            onClick={secondaryAction.action}
+            className={clsx(
+              'flex-1 px-4 py-3 rounded-lg font-medium text-sm transition-colors',
+              getSecondaryButtonStyle()
+            )}
+            style={{ borderColor: '#2DA6FF80' }}
+          >
+            {secondaryAction.label}
+          </button>
+        )}
+        {primaryAction && (
+          <button
+            type="button"
+            onClick={primaryAction.action}
+            className={clsx(
+              getPrimaryButtonLayout(
+                schedule.status,
+                showSecondaryButton && !!secondaryAction
+              ),
+              getButtonStyle(true)
+            )}
+          >
+            {primaryAction.label}
+          </button>
+        )}
+      </div>
+    );
   }
+);
 
-  return (
-    <div className="flex gap-3">
-      {secondaryAction && showSecondaryButton && (
-        <button
-          type="button"
-          onClick={secondaryAction.action}
-          className={clsx(
-            'flex-1 px-4 py-3 rounded-lg font-medium text-sm transition-colors',
-            getSecondaryButtonStyle()
-          )}
-          style={{ borderColor: '#2DA6FF80' }}
-        >
-          {secondaryAction.label}
-        </button>
-      )}
-      {primaryAction && (
-        <button
-          type="button"
-          onClick={primaryAction.action}
-          className={clsx(
-            getPrimaryButtonLayout(
-              schedule.status,
-              showSecondaryButton && !!secondaryAction
-            ),
-            getButtonStyle(true)
-          )}
-        >
-          {primaryAction.label}
-        </button>
-      )}
-    </div>
-  );
-};
+ScheduleActionButtons.displayName = 'ScheduleActionButtons';

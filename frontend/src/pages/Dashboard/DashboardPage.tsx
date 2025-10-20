@@ -1,3 +1,4 @@
+import { useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSchedules, useTodaySchedules } from '../../hooks/useSchedules';
 import { LoadingScreen } from '../../components/common/LoadingScreen';
@@ -9,138 +10,181 @@ import { HeaderDropdown } from '../../components/common/HeaderDropdown';
 import { ActiveVisitCard } from '../../components/common/ActiveVisitCard';
 import type { ScheduleStatus, ScheduleSummary } from '../../types';
 
-export const DashboardPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  const {
-    data: todayData,
-    isLoading: loadingToday,
-    isError: errorToday,
-    refetch: refetchToday,
-  } = useTodaySchedules();
-  const {
-    data: schedules,
-    isLoading: loadingAll,
-    isError: errorAll,
-    refetch: refetchAll,
-  } = useSchedules();
-
-  const handleLogout = () => {
+// Memoized header component
+const DashboardHeader: React.FC = memo(() => {
+  const handleLogout = useCallback(() => {
     // Add logout logic here
     console.log('Logging out...');
+  }, []);
+
+  return (
+    <header
+      className="mb-6 rounded-2xl px-6 py-4"
+      style={{ backgroundColor: '#D2EEFF' }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+            <span className="text-xl font-bold" style={{ color: '#1D1D1BDE' }}>
+              C
+            </span>
+          </div>
+          <div>
+            <p
+              className="text-xs font-medium uppercase tracking-[0.2em]"
+              style={{ color: '#1D1D1BDE' }}
+            >
+              Careviah
+            </p>
+          </div>
+        </div>
+        <HeaderDropdown
+          userName="Admin A"
+          userEmail="admin@healthcare.io"
+          onLogout={handleLogout}
+        />
+      </div>
+    </header>
+  );
+});
+
+DashboardHeader.displayName = 'DashboardHeader';
+
+// Memoized stats section
+const DashboardStats: React.FC<{
+  metrics: {
+    missed: number;
+    upcoming: number;
+    completed: number;
   };
+}> = memo(({ metrics }) => {
+  return (
+    <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <StatCard label="Missed Scheduled" value={metrics.missed} tone="missed" />
+      <StatCard
+        label="Upcoming Today's Schedule"
+        value={metrics.upcoming}
+        tone="upcoming"
+      />
+      <StatCard
+        label="Today's Completed Schedule"
+        value={metrics.completed}
+        tone="completed"
+      />
+    </div>
+  );
+});
 
-  if (loadingToday || loadingAll) {
-    return <LoadingScreen message="Loading your schedules..." />;
-  }
+DashboardStats.displayName = 'DashboardStats';
 
-  if (errorToday || errorAll || !todayData || !schedules) {
+// Memoized schedule item to prevent unnecessary re-renders
+const ScheduleItem: React.FC<{ schedule: ScheduleSummary }> = memo(
+  ({ schedule }) => {
+    const navigate = useNavigate();
+
+    const actions = useMemo(() => {
+      if (schedule.status === 'scheduled' || schedule.status === 'missed') {
+        return {
+          primary: {
+            label: 'Clock-in now',
+            action: () => navigate(`/schedule/${schedule.id}`),
+          },
+        };
+      }
+
+      if (schedule.status === 'in_progress') {
+        return {
+          primary: {
+            label: 'Clock-out now',
+            action: () => navigate(`/schedule/${schedule.id}/progress`),
+          },
+          secondary: {
+            label: 'View progress',
+            action: () => navigate(`/schedule/${schedule.id}/progress`),
+            variant: 'outline' as const,
+          },
+        };
+      }
+
+      if (schedule.status === 'completed') {
+        return {
+          primary: {
+            label: 'View report',
+            action: () => navigate(`/schedule/${schedule.id}`),
+          },
+        };
+      }
+
+      return {
+        primary: {
+          label: 'View details',
+          action: () => navigate(`/schedule/${schedule.id}`),
+        },
+      };
+    }, [schedule.id, schedule.status, navigate]);
+
     return (
-      <ErrorState
-        onRetry={() => void Promise.all([refetchToday(), refetchAll()])}
+      <ScheduleCard
+        schedule={schedule}
+        onPrimaryAction={actions.primary}
+        onSecondaryAction={actions.secondary}
       />
     );
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if the schedule ID or status changes
+    return (
+      prevProps.schedule.id === nextProps.schedule.id &&
+      prevProps.schedule.status === nextProps.schedule.status
+    );
   }
+);
 
-  // Handle the response as ScheduleSummary array
-  const todaySchedules = todayData || [];
-  const metrics = {
-    missed: 0,
-    upcoming: 0,
-    completed: 0,
-    total: todaySchedules.length,
-    in_progress: 0,
-    cancelled: 0,
-  };
+ScheduleItem.displayName = 'ScheduleItem';
 
-  const activeVisit = schedules.find((item) => item.status === 'in_progress');
+// Memoize the main content to prevent unnecessary re-renders
+const DashboardContent: React.FC<{
+  todaySchedules: ScheduleSummary[];
+  activeVisit: ScheduleSummary | undefined;
+}> = memo(({ todaySchedules, activeVisit }) => {
+  const navigate = useNavigate();
 
-  const priority: Record<ScheduleStatus, number> = {
-    in_progress: 0,
-    scheduled: 1,
-    missed: 2,
-    completed: 3,
-    cancelled: 4,
-  };
+  const metrics = useMemo(
+    () => ({
+      missed: 0,
+      upcoming: 0,
+      completed: 0,
+      total: todaySchedules.length,
+      in_progress: 0,
+      cancelled: 0,
+    }),
+    [todaySchedules]
+  );
 
-  const orderedSchedules = todaySchedules
-    .slice()
-    .sort((a, b) => priority[a.status] - priority[b.status]);
-
-  const renderScheduleActions = (schedule: ScheduleSummary) => {
-    if (schedule.status === 'scheduled' || schedule.status === 'missed') {
-      return {
-        primary: {
-          label: 'Clock-in now',
-          action: () => navigate(`/schedule/${schedule.id}`),
-        },
-      };
-    }
-
-    if (schedule.status === 'in_progress') {
-      return {
-        primary: {
-          label: 'Clock-out now',
-          action: () => navigate(`/schedule/${schedule.id}/progress`),
-        },
-        secondary: {
-          label: 'View progress',
-          action: () => navigate(`/schedule/${schedule.id}/progress`),
-          variant: 'outline' as const,
-        },
-      };
-    }
-
-    if (schedule.status === 'completed') {
-      return {
-        primary: {
-          label: 'View report',
-          action: () => navigate(`/schedule/${schedule.id}`),
-        },
-      };
-    }
-
-    return {
-      primary: {
-        label: 'View details',
-        action: () => navigate(`/schedule/${schedule.id}`),
-      },
+  const orderedSchedules = useMemo(() => {
+    const priority: Record<ScheduleStatus, number> = {
+      in_progress: 0,
+      scheduled: 1,
+      missed: 2,
+      completed: 3,
+      cancelled: 4,
     };
-  };
+
+    return todaySchedules
+      .slice()
+      .sort((a, b) => priority[a.status] - priority[b.status]);
+  }, [todaySchedules]);
+
+  const handleClockOut = useCallback(() => {
+    if (activeVisit) {
+      navigate(`/schedule/${activeVisit.id}/progress`);
+    }
+  }, [activeVisit, navigate]);
 
   return (
     <div className="bg-gray-50 min-h-screen pb-20">
       <div className="mx-auto max-w-6xl px-4 py-6 md:px-8">
-        <header
-          className="mb-6 rounded-2xl px-6 py-4"
-          style={{ backgroundColor: '#D2EEFF' }}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                <span
-                  className="text-xl font-bold"
-                  style={{ color: '#1D1D1BDE' }}
-                >
-                  C
-                </span>
-              </div>
-              <div>
-                <p
-                  className="text-xs font-medium uppercase tracking-[0.2em]"
-                  style={{ color: '#1D1D1BDE' }}
-                >
-                  Careviah
-                </p>
-              </div>
-            </div>
-            <HeaderDropdown
-              userName="Admin A"
-              userEmail="admin@healthcare.io"
-              onLogout={handleLogout}
-            />
-          </div>
-        </header>
+        <DashboardHeader />
 
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
@@ -153,30 +197,12 @@ export const DashboardPage: React.FC = () => {
           >
             <ActiveVisitCard
               schedule={activeVisit}
-              onClockOut={() =>
-                navigate(`/schedule/${activeVisit.id}/progress`)
-              }
+              onClockOut={handleClockOut}
             />
           </div>
         )}
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <StatCard
-            label="Missed Scheduled"
-            value={metrics.missed}
-            tone="missed"
-          />
-          <StatCard
-            label="Upcoming Today's Schedule"
-            value={metrics.upcoming}
-            tone="upcoming"
-          />
-          <StatCard
-            label="Today's Completed Schedule"
-            value={metrics.completed}
-            tone="completed"
-          />
-        </div>
+        <DashboardStats metrics={metrics} />
 
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -203,21 +229,57 @@ export const DashboardPage: React.FC = () => {
             />
           ) : (
             <div className="flex flex-col gap-4">
-              {orderedSchedules.map((schedule) => {
-                const actions = renderScheduleActions(schedule);
-                return (
-                  <ScheduleCard
-                    key={schedule.id}
-                    schedule={schedule}
-                    onPrimaryAction={actions.primary}
-                    onSecondaryAction={actions.secondary}
-                  />
-                );
-              })}
+              {orderedSchedules.map((schedule) => (
+                <ScheduleItem key={schedule.id} schedule={schedule} />
+              ))}
             </div>
           )}
         </section>
       </div>
     </div>
+  );
+});
+
+DashboardContent.displayName = 'DashboardContent';
+
+export const DashboardPage: React.FC = () => {
+  const {
+    data: todayData,
+    isLoading: loadingToday,
+    isError: errorToday,
+    refetch: refetchToday,
+  } = useTodaySchedules();
+  const {
+    data: schedules,
+    isLoading: loadingAll,
+    isError: errorAll,
+    refetch: refetchAll,
+  } = useSchedules();
+
+  // Memoize todaySchedules to prevent unnecessary re-computations
+  const todaySchedules = useMemo(() => todayData || [], [todayData]);
+
+  const activeVisit = useMemo(
+    () => schedules?.find((item) => item.status === 'in_progress'),
+    [schedules]
+  );
+
+  const handleRetry = useCallback(() => {
+    void Promise.all([refetchToday(), refetchAll()]);
+  }, [refetchToday, refetchAll]);
+
+  if (loadingToday || loadingAll) {
+    return <LoadingScreen message="Loading your schedules..." />;
+  }
+
+  if (errorToday || errorAll || !schedules) {
+    return <ErrorState onRetry={handleRetry} />;
+  }
+
+  return (
+    <DashboardContent
+      todaySchedules={todaySchedules}
+      activeVisit={activeVisit}
+    />
   );
 };

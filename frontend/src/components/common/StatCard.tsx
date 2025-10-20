@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface StatCardProps {
   label: string;
   value: number | string;
@@ -11,19 +13,19 @@ const toneClasses: Record<NonNullable<StatCardProps['tone']>, string> = {
   neutral: 'text-gray-600',
 };
 
-export const StatCard: React.FC<StatCardProps> = ({
-  label,
-  value,
-  tone = 'neutral',
-}) => {
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <div className="text-center">
-        <div className={`text-4xl font-bold mb-2 ${toneClasses[tone]}`}>
-          {value}
+export const StatCard: React.FC<StatCardProps> = memo(
+  ({ label, value, tone = 'neutral' }) => {
+    return (
+      <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="text-center">
+          <div className={`text-4xl font-bold mb-2 ${toneClasses[tone]}`}>
+            {value}
+          </div>
+          <div className="text-sm font-medium text-gray-600">{label}</div>
         </div>
-        <div className="text-sm font-medium text-gray-600">{label}</div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
+
+StatCard.displayName = 'StatCard';
