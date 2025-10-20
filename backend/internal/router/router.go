@@ -21,6 +21,7 @@ func NewRouter(
 	authHandler *handler.AuthHandler,
 	scheduleHandler *handler.ScheduleHandler,
 	taskHandler *handler.TaskHandler,
+	attendanceHandler *handler.CaregiverAttendanceHandler,
 	docsHandler *handler.DocsHandler,
 	logRepo repository.RequestLogRepository,
 	corsCfg config.CORSConfig,
@@ -61,6 +62,12 @@ func NewRouter(
 		protected.POST("/schedules/:scheduleID/tasks", taskHandler.CreateTask)
 
 		protected.PATCH("/tasks/:taskID", taskHandler.UpdateTaskStatus)
+
+		// Caregiver Attendance endpoints
+		protected.GET("/attendance/today/status", attendanceHandler.GetTodayStatus)
+		protected.POST("/attendance/clock-in", attendanceHandler.ClockIn)
+		protected.POST("/attendance/clock-out", attendanceHandler.ClockOut)
+		protected.GET("/attendance/history", attendanceHandler.GetAttendanceHistory)
 	}
 
 	return r

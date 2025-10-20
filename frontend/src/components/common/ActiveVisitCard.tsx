@@ -1,14 +1,40 @@
 import React from 'react';
-import type { ScheduleSummary } from '@/types';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { useReverseGeocode } from '@/hooks/useReverseGeocode';
+import { useClockIn, useClockOut } from '@/hooks/useAttendance';
 import { RealTimeClock } from '@/components/common/RealTimeClock';
 
 interface ActiveVisitCardProps {
-  schedule: ScheduleSummary;
-  onClockOut: () => void;
+  caregiverName: string;
+  serviceName: string;
+  clientName: string;
+  isClockIn: boolean;
+  onClockAction?: () => void;
 }
 
 export const ActiveVisitCard: React.FC<ActiveVisitCardProps> = React.memo(
-  ({ schedule, onClockOut }) => {
+  ({ serviceName, clientName, isClockIn, onClockAction }) => {
+    const { coords } = useGeolocation();
+    const { address } = useReverseGeocode(coords?.latitude, coords?.longitude);
+    const clockInMutation = useClockIn();
+    const clockOutMutation = useClockOut();
+
+    const handleClockAction = async () => {
+      const latitude = coords?.latitude ?? 0;
+      const longitude = coords?.longitude ?? 0;
+
+      try {
+        if (isClockIn) {
+          await clockInMutation.mutateAsync({ latitude, longitude });
+        } else {
+          await clockOutMutation.mutateAsync({ latitude, longitude });
+        }
+        onClockAction?.();
+      } catch (error) {
+        console.error(`${isClockIn ? 'Clock-in' : 'Clock-out'} failed:`, error);
+      }
+    };
+
     return (
       <>
         {/* Timer Display - Top Center */}
@@ -23,72 +49,91 @@ export const ActiveVisitCard: React.FC<ActiveVisitCardProps> = React.memo(
             <div className="w-12 h-12 rounded-full bg-white/20 overflow-hidden">
               <img
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
-                  schedule.client_name
+                  clientName
                 )}&backgroundColor=b6e3f4`}
-                alt={schedule.client_name}
+                alt={clientName}
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
-              <h3 className="font-semibold text-white">
-                {schedule.client_name}
-              </h3>
+              <h3 className="font-semibold text-white">{clientName}</h3>
               {/* Desktop: Show service name */}
               <p className="text-white/80 text-sm hidden md:block">
-                {schedule.service_name}
+                {serviceName}
               </p>
             </div>
           </div>
 
-          {/* Mobile: Address and Time - Separate Lines */}
+          {/* Location Information */}
+          {address && (
+            <div className="mb-3">
+              <div className="flex items-start gap-2 text-white/80 text-sm">
+                <span className="material-symbols-rounded text-sm !text-white flex-shrink-0 mt-0.5">
+                  location_on
+                </span>
+                <span className="break-words">{address}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile: Current Day and Time */}
           <div className="md:hidden">
-            {/* Address - Separate Line */}
             <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
               <span className="material-symbols-rounded text-sm !text-white">
-                location_on
+                calendar_today
               </span>
-              <span>117-101 Iowa St, Minnesota City, MN 55959, USA</span>
-            </div>
-
-            {/* Time - Separate Line */}
-            <div className="flex items-center gap-2 text-white/80 text-sm">
-              <span className="material-symbols-rounded text-sm !text-white">
-                schedule
+              <span>
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
               </span>
-              <span>10:30 - 12:30 SGT</span>
             </div>
           </div>
 
-          {/* Desktop: Address and Time - Same Line */}
+          {/* Desktop: Current Day and Time */}
           <div className="hidden md:flex items-center gap-2 text-white/80 text-sm">
             <span className="material-symbols-rounded text-sm !text-white">
-              location_on
+              calendar_today
             </span>
-            <span>117-101 Iowa St, Minnesota City, MN 55959, USA</span>
-            <span className="mx-2 !text-white">|</span>
-            <span className="material-symbols-rounded text-sm !text-white">
-              schedule
+            <span>
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </span>
-            <span>10:30 - 12:30 SGT</span>
           </div>
         </div>
 
-        {/* Full Width Clock-Out Button */}
+        {/* Full Width Clock-In/Clock-Out Button */}
         <button
           type="button"
-          className="w-full rounded-lg bg-white py-3 text-slate-800 font-medium hover:bg-white/90 transition-colors flex items-center justify-center gap-2"
-          onClick={onClockOut}
+          className="w-full rounded-lg bg-white py-3 text-slate-800 font-medium hover:bg-white/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          onClick={handleClockAction}
+          disabled={clockInMutation.isPending || clockOutMutation.isPending}
         >
           {/* Clock icon - Both mobile and desktop */}
           <span
             className="material-symbols-rounded"
-            style={{ color: '#0D5D59' }}
+            style={{ color: isClockIn ? '#02CAD1' : '#0D5D59' }}
           >
             schedule
           </span>
-          Clock-Out
+          {isClockIn
+            ? clockInMutation.isPending
+              ? 'Clocking in...'
+              : 'Clock-In'
+            : clockOutMutation.isPending
+            ? 'Clocking out...'
+            : 'Clock-Out'}
         </button>
       </>
     );
   }
 );
+
+ActiveVisitCard.displayName = 'ActiveVisitCard';

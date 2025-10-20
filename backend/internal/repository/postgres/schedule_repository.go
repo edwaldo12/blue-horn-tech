@@ -72,14 +72,23 @@ func (r *ScheduleRepository) ListSchedules(ctx context.Context, caregiverID stri
 		argPosition++
 	}
 
-	query += " ORDER BY s.start_time ASC"
+	query += ` ORDER BY 
+		CASE s.status 
+			WHEN 'in_progress' THEN 0
+			WHEN 'scheduled' THEN 1
+			WHEN 'missed' THEN 2
+			WHEN 'completed' THEN 3
+			WHEN 'cancelled' THEN 4
+			ELSE 5
+		END,
+		s.start_time DESC`
 
 	// Add pagination if limit is specified
 	if filter.Limit > 0 {
 		query += " LIMIT $" + itoa(argPosition)
 		args = append(args, filter.Limit)
 		argPosition++
-		
+
 		if filter.Offset > 0 {
 			query += " OFFSET $" + itoa(argPosition)
 			args = append(args, filter.Offset)

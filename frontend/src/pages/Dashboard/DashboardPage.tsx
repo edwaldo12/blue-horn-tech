@@ -1,11 +1,8 @@
 import { useCallback, useMemo, memo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  useInfiniteSchedules,
-  useTodaySchedules,
-  useEndSchedule,
-} from '@/hooks/useSchedules';
+import { useInfiniteSchedules, useTodaySchedules } from '@/hooks/useSchedules';
 import { useAuth } from '@/hooks/useAuth';
+import { useTodayAttendanceStatus } from '@/hooks/useAttendance';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { ErrorState } from '@/components/common/ErrorState';
 import { StatCard } from '@/components/common/StatCard';
@@ -14,12 +11,11 @@ import { ScheduleCardSkeleton } from '@/components/common/ScheduleCardSkeleton';
 import { EmptyState } from '@/components/common/EmptyState';
 import { HeaderDropdown } from '@/components/common/HeaderDropdown';
 import { ActiveVisitCard } from '@/components/common/ActiveVisitCard';
-import type { ScheduleStatus, ScheduleSummary } from '@/types';
+import type { ScheduleSummary } from '@/types';
 
 // Memoized header component
 const DashboardHeader: React.FC = memo(() => {
   const handleLogout = useCallback(() => {
-    // Add logout logic here
     console.log('Logging out...');
   }, []);
 
@@ -186,159 +182,158 @@ ScheduleItem.displayName = 'ScheduleItem';
 // Memoize the main content to prevent unnecessary re-renders
 const DashboardContent: React.FC<{
   todaySchedules: ScheduleSummary[];
-  activeVisit: ScheduleSummary | undefined;
   caregiverName: string;
   schedules: ScheduleSummary[];
   hasNextPage: boolean;
   fetchNextPage: () => void;
   isFetchingNextPage: boolean;
-}> = memo(({
-  todaySchedules,
-  activeVisit,
-  caregiverName,
-  schedules,
-  hasNextPage,
-  fetchNextPage,
-  isFetchingNextPage
-}) => {
-  const endMutation = useEndSchedule(activeVisit?.id || '');
-  const observer = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+}> = memo(
+  ({
+    todaySchedules,
+    caregiverName,
+    schedules,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  }) => {
+    const { data: attendanceStatus } = useTodayAttendanceStatus();
+    const observer = useRef<IntersectionObserver | null>(null);
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // Set up intersection observer for infinite scroll
-  useEffect(() => {
-    if (observer.current) observer.current.disconnect();
+    // Set up intersection observer for infinite scroll
+    useEffect(() => {
+      if (observer.current) observer.current.disconnect();
 
-    observer.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 }
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      if (loadMoreRef.current) {
+        observer.current.observe(loadMoreRef.current);
+      }
+
+      return () => {
+        if (observer.current) observer.current.disconnect();
+      };
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const metrics = useMemo(
+      () => ({
+        missed: 0,
+        upcoming: 0,
+        completed: 0,
+        total: todaySchedules.length,
+        in_progress: 0,
+        cancelled: 0,
+      }),
+      [todaySchedules]
     );
 
-    if (loadMoreRef.current) {
-      observer.current.observe(loadMoreRef.current);
-    }
+    const handleClockIn = useCallback(() => {
+      // The clock-in is now handled in the ActiveVisitCard component
+      // No need to refresh as the query will automatically refetch
+    }, []);
 
-    return () => {
-      if (observer.current) observer.current.disconnect();
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    const handleClockOut = useCallback(() => {
+      // The clock-out is now handled in the ActiveVisitCard component
+      // No need to refresh as the query will automatically refetch
+    }, []);
 
-  const metrics = useMemo(
-    () => ({
-      missed: 0,
-      upcoming: 0,
-      completed: 0,
-      total: todaySchedules.length,
-      in_progress: 0,
-      cancelled: 0,
-    }),
-    [todaySchedules]
-  );
+    return (
+      <div className="bg-gray-50 min-h-screen pb-20">
+        <div className="mx-auto max-w-6xl px-4 py-6 md:px-8">
+          <DashboardHeader />
 
-  const orderedSchedules = useMemo(() => {
-    const priority: Record<ScheduleStatus, number> = {
-      in_progress: 0,
-      scheduled: 1,
-      missed: 2,
-      completed: 3,
-      cancelled: 4,
-    };
-
-    return schedules
-      .slice()
-      .sort((a, b) => priority[a.status] - priority[b.status]);
-  }, [schedules]);
-
-  const handleClockOut = useCallback(async () => {
-    if (!activeVisit) return;
-
-    try {
-      // Use default coordinates for clock-out (0,0 as fallback)
-      await endMutation.mutateAsync({
-        latitude: 0,
-        longitude: 0,
-      });
-      // Stay on dashboard - the mutation will update the data
-    } catch (error) {
-      console.error('Clock-out failed:', error);
-      alert('Failed to clock out. Please try again.');
-    }
-  }, [activeVisit, endMutation]);
-
-  return (
-    <div className="bg-gray-50 min-h-screen pb-20">
-      <div className="mx-auto max-w-6xl px-4 py-6 md:px-8">
-        <DashboardHeader />
-
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900 md:block hidden">
-            Dashboard
-          </h1>
-          <h1 className="text-2xl font-semibold text-gray-900 md:hidden">
-            Welcome, {caregiverName} !
-          </h1>
-        </div>
-
-        {activeVisit && (
-          <div
-            className="mb-8 rounded-2xl p-6 text-white shadow-lg"
-            style={{ backgroundColor: '#0D5D59' }}
-          >
-            <ActiveVisitCard
-              schedule={activeVisit}
-              onClockOut={handleClockOut}
-            />
-            {endMutation.isPending && (
-              <div className="mt-4 text-center text-white/80">
-                Clocking out...
-              </div>
-            )}
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-gray-900 md:block hidden">
+              Dashboard
+            </h1>
+            <h1 className="text-2xl font-semibold text-gray-900 md:hidden">
+              Welcome, {caregiverName} !
+            </h1>
           </div>
-        )}
 
-        <DashboardStats metrics={metrics} />
-
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h3 className="text-xl font-semibold text-gray-900">Schedule</h3>
-              <span
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-semibold"
-                style={{ backgroundColor: '#02CAD1' }}
-              >
-                {orderedSchedules.length}
-              </span>
-            </div>
-          </div>
-          {orderedSchedules.length === 0 ? (
-            <EmptyState
-              title="No visits scheduled for today"
-              description="You're all caught up! Check back later for new assignments."
-            />
-          ) : (
-            <div className="flex flex-col gap-4">
-              {orderedSchedules.map((schedule) => (
-                <ScheduleItem key={schedule.id} schedule={schedule} />
-              ))}
-              {/* Show skeleton cards when fetching next page */}
-              {isFetchingNextPage && Array.from({ length: 5 }).map((_, index) => (
-                <ScheduleCardSkeleton key={`skeleton-${index}`} />
-              ))}
-              {/* Load more trigger for infinite scroll */}
-              {hasNextPage && !isFetchingNextPage && (
-                <div ref={loadMoreRef} className="h-8"></div> // Invisible element to trigger intersection
-              )}
+          {/* Show Clock-In card if not clocked in today */}
+          {!attendanceStatus?.has_clocked_in && (
+            <div
+              className="mb-8 rounded-2xl p-6 text-white shadow-lg"
+              style={{ backgroundColor: '#0D5D59' }}
+            >
+              <ActiveVisitCard
+                caregiverName={caregiverName}
+                serviceName="Healthcare Service"
+                clientName={caregiverName}
+                isClockIn={true}
+                onClockAction={handleClockIn}
+              />
             </div>
           )}
-        </section>
+
+          {/* Show Clock-Out card if clocked in but not clocked out */}
+          {attendanceStatus?.has_clocked_in &&
+            !attendanceStatus?.has_clocked_out && (
+              <div
+                className="mb-8 rounded-2xl p-6 text-white shadow-lg"
+                style={{ backgroundColor: '#0D5D59' }}
+              >
+                <ActiveVisitCard
+                  caregiverName={caregiverName}
+                  serviceName="Healthcare Service"
+                  clientName={caregiverName}
+                  isClockIn={false}
+                  onClockAction={handleClockOut}
+                />
+              </div>
+            )}
+
+          <DashboardStats metrics={metrics} />
+
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Schedule
+                </h3>
+                <span
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-semibold"
+                  style={{ backgroundColor: '#02CAD1' }}
+                >
+                  {schedules.length}
+                </span>
+              </div>
+            </div>
+            {schedules.length === 0 ? (
+              <EmptyState
+                title="No visits scheduled for today"
+                description="You're all caught up! Check back later for new assignments."
+              />
+            ) : (
+              <div className="flex flex-col gap-4">
+                {schedules.map((schedule) => (
+                  <ScheduleItem key={schedule.id} schedule={schedule} />
+                ))}
+                {/* Show skeleton cards when fetching next page */}
+                {isFetchingNextPage &&
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <ScheduleCardSkeleton key={`skeleton-${index}`} />
+                  ))}
+                {/* Load more trigger for infinite scroll */}
+                {hasNextPage && !isFetchingNextPage && (
+                  <div ref={loadMoreRef} className="h-8"></div> // Invisible element to trigger intersection
+                )}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 DashboardContent.displayName = 'DashboardContent';
 
@@ -362,15 +357,10 @@ export const DashboardPage: React.FC = () => {
   // Memoize todaySchedules to prevent unnecessary re-computations
   const todaySchedules = useMemo(() => todayData || [], [todayData]);
 
-  // Flatten all pages of schedules
+  // Flatten all pages of schedules - backend handles correct ordering
   const schedules = useMemo(
-    () => schedulesData?.pages?.flatMap(page => page?.data || []) || [],
+    () => schedulesData?.pages?.flatMap((page) => page?.data || []) || [],
     [schedulesData]
-  );
-
-  const activeVisit = useMemo(
-    () => schedules.find((item) => item.status === 'in_progress'),
-    [schedules]
   );
 
   const handleRetry = useCallback(() => {
@@ -388,7 +378,6 @@ export const DashboardPage: React.FC = () => {
   return (
     <DashboardContent
       todaySchedules={todaySchedules}
-      activeVisit={activeVisit}
       caregiverName={caregiver?.name || 'Guest'}
       schedules={schedules}
       hasNextPage={hasNextPage}
