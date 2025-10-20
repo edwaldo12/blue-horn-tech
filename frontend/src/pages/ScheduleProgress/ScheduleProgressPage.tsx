@@ -13,6 +13,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { useReverseGeocode } from '@/hooks/useReverseGeocode';
 import { LocationMapPreview } from '@/components/common/LocationMapPreview';
 import { ScheduleCompletedModal } from '@/components/common/ScheduleCompletedModal';
+import { ScheduleCompletedModalDesktop } from '@/components/common/ScheduleCompletedModalDesktop';
 import type { Task } from '@/types';
 
 export const ScheduleProgressPage: React.FC = () => {
@@ -119,6 +120,7 @@ export const ScheduleProgressPage: React.FC = () => {
     }
 
     try {
+      // TODO: Uncomment this when the function is all done
       // await endMutation.mutateAsync({ latitude, longitude });
       setShowCompletedModal(true);
     } catch (error) {
@@ -401,9 +403,18 @@ export const ScheduleProgressPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Completion Modal */}
+      {/* Completion Modal - Mobile */}
       {schedule && (
         <ScheduleCompletedModal
+          schedule={schedule}
+          isOpen={showCompletedModal}
+          onClose={() => setShowCompletedModal(false)}
+        />
+      )}
+
+      {/* Completion Modal - Desktop */}
+      {schedule && (
+        <ScheduleCompletedModalDesktop
           schedule={schedule}
           isOpen={showCompletedModal}
           onClose={() => setShowCompletedModal(false)}
