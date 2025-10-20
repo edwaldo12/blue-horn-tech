@@ -324,6 +324,19 @@ export const ScheduleProgressPage: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Add New Task - Mobile Only */}
+          <div className="md:hidden mt-4 px-4">
+            <button
+              type="button"
+              className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <span className="text-xl font-bold" style={{ color: '#02CAD1' }}>
+                +
+              </span>
+              <span className="text-sm font-medium">Add new task</span>
+            </button>
+          </div>
         </div>
 
         {/* Clock-In Location */}
