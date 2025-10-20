@@ -1,6 +1,10 @@
 import { useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSchedules, useTodaySchedules } from '../../hooks/useSchedules';
+import {
+  useSchedules,
+  useTodaySchedules,
+  useEndSchedule,
+} from '../../hooks/useSchedules';
 import { LoadingScreen } from '../../components/common/LoadingScreen';
 import { ErrorState } from '../../components/common/ErrorState';
 import { StatCard } from '../../components/common/StatCard';
@@ -147,7 +151,7 @@ const DashboardContent: React.FC<{
   todaySchedules: ScheduleSummary[];
   activeVisit: ScheduleSummary | undefined;
 }> = memo(({ todaySchedules, activeVisit }) => {
-  const navigate = useNavigate();
+  const endMutation = useEndSchedule(activeVisit?.id || '');
 
   const metrics = useMemo(
     () => ({
@@ -175,11 +179,21 @@ const DashboardContent: React.FC<{
       .sort((a, b) => priority[a.status] - priority[b.status]);
   }, [todaySchedules]);
 
-  const handleClockOut = useCallback(() => {
-    if (activeVisit) {
-      navigate(`/schedule/${activeVisit.id}/progress`);
+  const handleClockOut = useCallback(async () => {
+    if (!activeVisit) return;
+
+    try {
+      // Use default coordinates for clock-out (0,0 as fallback)
+      await endMutation.mutateAsync({
+        latitude: 0,
+        longitude: 0,
+      });
+      // Stay on dashboard - the mutation will update the data
+    } catch (error) {
+      console.error('Clock-out failed:', error);
+      alert('Failed to clock out. Please try again.');
     }
-  }, [activeVisit, navigate]);
+  }, [activeVisit, endMutation]);
 
   return (
     <div className="bg-gray-50 min-h-screen pb-20">
@@ -199,6 +213,11 @@ const DashboardContent: React.FC<{
               schedule={activeVisit}
               onClockOut={handleClockOut}
             />
+            {endMutation.isPending && (
+              <div className="mt-4 text-center text-white/80">
+                Clocking out...
+              </div>
+            )}
           </div>
         )}
 

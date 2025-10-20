@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   useEndSchedule,
@@ -10,6 +10,9 @@ import { ErrorState } from '../../components/common/ErrorState';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { RealTimeClock } from '../../components/common/RealTimeClock';
 import { useGeolocation } from '../../hooks/useGeolocation';
+import { useReverseGeocode } from '../../hooks/useReverseGeocode';
+import { LocationMapPreview } from '../../components/common/LocationMapPreview';
+import { ScheduleCompletedModal } from '../../components/common/ScheduleCompletedModal';
 import type { Task } from '../../types';
 
 export const ScheduleProgressPage: React.FC = () => {
@@ -23,18 +26,49 @@ export const ScheduleProgressPage: React.FC = () => {
   } = useScheduleDetail(scheduleId);
   const updateTaskMutation = useUpdateTaskStatus(scheduleId);
   const endMutation = useEndSchedule(scheduleId);
-  const {
-    coords,
-    error: geoError,
-    loading: locating,
-    requestPosition,
-  } = useGeolocation();
+  const { coords, error: geoError } = useGeolocation();
 
   const [reasonDrafts, setReasonDrafts] = useState<
     Record<string, string | undefined>
   >({});
   const [manualLat, setManualLat] = useState('');
   const [manualLng, setManualLng] = useState('');
+  const [showCompletedModal, setShowCompletedModal] = useState(false);
+
+  const fallbackLatitude = useMemo(() => {
+    const manual = manualLat ? Number(manualLat) : undefined;
+    return (
+      coords?.latitude ??
+      schedule?.clock_in_lat ??
+      schedule?.client.latitude ??
+      manual
+    );
+  }, [
+    coords?.latitude,
+    manualLat,
+    schedule?.client.latitude,
+    schedule?.clock_in_lat,
+  ]);
+
+  const fallbackLongitude = useMemo(() => {
+    const manual = manualLng ? Number(manualLng) : undefined;
+    return (
+      coords?.longitude ??
+      schedule?.clock_in_long ??
+      schedule?.client.longitude ??
+      manual
+    );
+  }, [
+    coords?.longitude,
+    manualLng,
+    schedule?.client.longitude,
+    schedule?.clock_in_long,
+  ]);
+
+  const { address: resolvedAddress } = useReverseGeocode(
+    fallbackLatitude,
+    fallbackLongitude
+  );
 
   if (isLoading) {
     return <LoadingScreen message="Loading active visit..." />;
@@ -69,16 +103,29 @@ export const ScheduleProgressPage: React.FC = () => {
   };
 
   const handleClockOut = async () => {
-    const latitude = coords?.latitude ?? Number(manualLat);
-    const longitude = coords?.longitude ?? Number(manualLng);
+    const latitude =
+      fallbackLatitude ?? (manualLat ? Number(manualLat) : undefined);
+    const longitude =
+      fallbackLongitude ?? (manualLng ? Number(manualLng) : undefined);
 
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    if (
+      !latitude ||
+      !longitude ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
+    ) {
       alert('Please allow geolocation or provide coordinates manually.');
       return;
     }
 
-    const updated = await endMutation.mutateAsync({ latitude, longitude });
-    navigate(`/schedule/${updated.id}`, { replace: true });
+    try {
+      // await endMutation.mutateAsync({ latitude, longitude });
+      console.log('ASDASDASD');
+      setShowCompletedModal(true);
+    } catch (error) {
+      console.error('Clock-out failed:', error);
+      alert('Failed to clock out. Please try again.');
+    }
   };
 
   const handleLogout = () => {
@@ -274,50 +321,40 @@ export const ScheduleProgressPage: React.FC = () => {
         {/* Clock-In Location */}
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">
-            Clock-In Location:
+            Clock-In Location
           </h2>
-          <div className="flex items-start gap-2 text-sm text-gray-600">
-            <span className="material-symbols-rounded text-base text-[#0D5D59]">
-              location_on
-            </span>
-            <div>
-              <div>Latitude: {coords?.latitude?.toFixed(6) ?? '—'}</div>
-              <div>Longitude: {coords?.longitude?.toFixed(6) ?? '—'}</div>
-              <button
-                type="button"
-                className="text-[#0D5D59] hover:underline mt-1"
-                onClick={() => requestPosition()}
-                disabled={locating}
-              >
-                {locating ? 'Locating…' : 'Retry'}
-              </button>
-            </div>
-          </div>
+          <LocationMapPreview
+            latitude={fallbackLatitude}
+            longitude={fallbackLongitude}
+            address={resolvedAddress ?? schedule.client.address}
+            className="mb-4"
+          />
           {geoError && (
             <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <span className="text-sm text-yellow-800">{geoError}</span>
             </div>
           )}
-          {!coords && (
-            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-              <input
-                type="number"
-                step="0.000001"
-                className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                placeholder="Manual latitude"
-                value={manualLat}
-                onChange={(event) => setManualLat(event.target.value)}
-              />
-              <input
-                type="number"
-                step="0.000001"
-                className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                placeholder="Manual longitude"
-                value={manualLng}
-                onChange={(event) => setManualLng(event.target.value)}
-              />
-            </div>
-          )}
+          {fallbackLatitude === undefined &&
+            fallbackLongitude === undefined && (
+              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                <input
+                  type="number"
+                  step="0.000001"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                  placeholder="Manual latitude"
+                  value={manualLat}
+                  onChange={(event) => setManualLat(event.target.value)}
+                />
+                <input
+                  type="number"
+                  step="0.000001"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                  placeholder="Manual longitude"
+                  value={manualLng}
+                  onChange={(event) => setManualLng(event.target.value)}
+                />
+              </div>
+            )}
         </div>
 
         {/* Service Notes */}
@@ -357,6 +394,15 @@ export const ScheduleProgressPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Completion Modal */}
+      {schedule && (
+        <ScheduleCompletedModal
+          schedule={schedule}
+          isOpen={showCompletedModal}
+          onClose={() => setShowCompletedModal(false)}
+        />
+      )}
     </div>
   );
 };

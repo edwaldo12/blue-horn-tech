@@ -84,6 +84,9 @@ INSERT INTO schedules (
     ('0f200db3-a712-4635-9cfa-8df4839f1adb', 'c2d1bb61-8d67-4db5-9e59-4c2c16f7d4f2', '4f1bbd73-df5e-4f3a-a59c-2d1fe15f0aaf',
      'Service Name A', 'Casa Grande Apartment', NOW() - INTERVAL '1 hour', NOW() + INTERVAL '0.5 hour',
      'in_progress', NOW() - INTERVAL '55 minute', 44.972700, -93.235400, NULL, NULL, NULL, 'Ongoing visit in progress.'),
+    ('9b8c7d6e-5f4a-3210-9876-543210fedcba', 'c2d1bb61-8d67-4db5-9e59-4c2c16f7d4f2', '4f1bbd73-df5e-4f3a-a59c-2d1fe15f0aaf',
+     'Home Care Service', 'Minnesota City Residence', NOW() - INTERVAL '30 minute', NOW() + INTERVAL '1.5 hour',
+     'in_progress', NOW() - INTERVAL '25 minute', 44.1234, -93.5678, NULL, NULL, NULL, 'Currently providing home care services.'),
     ('a8a6d494-3b35-4536-b4f4-8023c2f13914', 'c2d1bb61-8d67-4db5-9e59-4c2c16f7d4f2', '4f1bbd73-df5e-4f3a-a59c-2d1fe15f0aaf',
      'Service Name A', 'Casa Grande Apartment', NOW() - INTERVAL '5 hour', NOW() - INTERVAL '4 hour',
      'completed', NOW() - INTERVAL '4 hour 45 minute', 44.972600, -93.235300, NOW() - INTERVAL '4 hour', 44.972800, -93.235100, 'All tasks completed on time.'),
@@ -99,6 +102,11 @@ INSERT INTO schedule_tasks (id, schedule_id, title, description, status, sort_or
     (gen_random_uuid(), '0f200db3-a712-4635-9cfa-8df4839f1adb', 'Activity Name A', 'Review medication checklist.', 'pending', 1),
     (gen_random_uuid(), '0f200db3-a712-4635-9cfa-8df4839f1adb', 'Activity Name B', 'Assist with morning routine.', 'pending', 2),
     (gen_random_uuid(), '0f200db3-a712-4635-9cfa-8df4839f1adb', 'Activity Name C', 'Prepare breakfast.', 'pending', 3),
+
+    (gen_random_uuid(), '9b8c7d6e-5f4a-3210-9876-543210fedcba', 'Medication Administration', 'Administer morning medications as prescribed.', 'pending', 1),
+    (gen_random_uuid(), '9b8c7d6e-5f4a-3210-9876-543210fedcba', 'Personal Care Assistance', 'Assist with personal hygiene and grooming.', 'pending', 2),
+    (gen_random_uuid(), '9b8c7d6e-5f4a-3210-9876-543210fedcba', 'Meal Preparation', 'Prepare and serve lunch.', 'pending', 3),
+    (gen_random_uuid(), '9b8c7d6e-5f4a-3210-9876-543210fedcba', 'Physical Therapy Exercises', 'Guide through prescribed exercises.', 'pending', 4),
 
     (gen_random_uuid(), 'a8a6d494-3b35-4536-b4f4-8023c2f13914', 'Activity Name A', 'Review medication checklist.', 'completed', 1),
     (gen_random_uuid(), 'a8a6d494-3b35-4536-b4f4-8023c2f13914', 'Activity Name B', 'Assist with morning routine.', 'completed', 2),

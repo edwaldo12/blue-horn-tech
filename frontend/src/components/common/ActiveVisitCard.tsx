@@ -39,11 +39,14 @@ export const ActiveVisitCard: React.FC<ActiveVisitCardProps> = React.memo(
 
           {/* Address and Time - Same Line */}
           <div className="flex items-center gap-2 text-white/80 text-sm">
-            <span className="material-symbols-rounded text-sm">
+            <span className="material-symbols-rounded text-sm !text-white">
               location_on
             </span>
             <span>117-101 Iowa St, Minnesota City, MN 55959, USA</span>
-            <span className="mx-2">|</span>
+            <span className="mx-2 !text-white">|</span>
+            <span className="material-symbols-rounded text-sm !text-white">
+              schedule
+            </span>
             <span>10:30 - 12:30 SGT</span>
           </div>
         </div>
