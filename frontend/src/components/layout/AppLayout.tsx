@@ -10,14 +10,20 @@ export const AppLayout: React.FC = () => {
   const location = useLocation();
 
   return (
-    <div className="flex min-h-screen flex-col bg-base-100">
-      <main className="flex-1 pb-20 md:pb-0">
+    <div className="flex min-h-[100svh] flex-col bg-base-100">
+      <main
+        className="flex-1 pb-20 md:pb-0"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         <Outlet />
       </main>
 
       <nav
         className="border-t border-base-200 shadow-sm md:hidden"
-        style={{ backgroundColor: '#F5FBFF' }}
+        style={{
+          backgroundColor: '#F5FBFF',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
       >
         <div className="mx-auto flex max-w-md items-center justify-around py-3">
           {tabs.map((tab) => {

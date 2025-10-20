@@ -38,11 +38,11 @@ const getPrimaryButtonLayout = (
   hasSecondary: boolean
 ): string => {
   if (status === 'scheduled' || status === 'completed') {
-    return 'w-full px-4 py-3 rounded-lg font-medium text-sm transition-colors';
+    return 'w-full px-4 py-2 rounded-lg font-medium text-sm transition-colors';
   }
   return hasSecondary
-    ? 'flex-1 px-4 py-3 rounded-lg font-medium text-sm transition-colors'
-    : 'w-full px-4 py-3 rounded-lg font-medium text-sm transition-colors';
+    ? 'flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors'
+    : 'w-full px-4 py-2 rounded-lg font-medium text-sm transition-colors';
 };
 
 export const ScheduleActionButtons: React.FC<ScheduleActionButtonsProps> = memo(
@@ -61,7 +61,7 @@ export const ScheduleActionButtons: React.FC<ScheduleActionButtonsProps> = memo(
             type="button"
             onClick={secondaryAction.action}
             className={clsx(
-              'flex-1 px-4 py-3 rounded-lg font-medium text-sm transition-colors',
+              'flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors',
               getSecondaryButtonStyle()
             )}
             style={{ borderColor: '#2DA6FF80' }}

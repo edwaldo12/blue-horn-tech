@@ -18,7 +18,9 @@ export const StatCard: React.FC<StatCardProps> = memo(
     return (
       <div className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="text-center">
-          <div className={`text-4xl font-bold mb-2 ${toneClasses[tone]}`}>
+          <div
+            className={`text-5xl md:text-4xl font-bold mb-2 ${toneClasses[tone]}`}
+          >
             {value}
           </div>
           <div className="text-sm font-medium text-gray-600">{label}</div>

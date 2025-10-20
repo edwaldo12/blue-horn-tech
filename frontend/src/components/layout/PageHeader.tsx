@@ -17,7 +17,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   return (
     <header
-      className="mb-6 rounded-2xl px-6 py-4"
+      className="mb-6 hidden rounded-2xl px-6 py-4 md:block"
       style={{ backgroundColor: '#D2EEFF' }}
     >
       <div className="flex items-center justify-between">

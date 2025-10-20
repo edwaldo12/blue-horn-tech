@@ -5,6 +5,7 @@ import {
   useTodaySchedules,
   useEndSchedule,
 } from '@/hooks/useSchedules';
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { ErrorState } from '@/components/common/ErrorState';
 import { StatCard } from '@/components/common/StatCard';
@@ -23,7 +24,7 @@ const DashboardHeader: React.FC = memo(() => {
 
   return (
     <header
-      className="mb-6 rounded-2xl px-6 py-4"
+      className="mb-6 hidden rounded-2xl px-6 py-4 md:block"
       style={{ backgroundColor: '#D2EEFF' }}
     >
       <div className="flex items-center justify-between">
@@ -63,19 +64,49 @@ const DashboardStats: React.FC<{
   };
 }> = memo(({ metrics }) => {
   return (
-    <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-      <StatCard label="Missed Scheduled" value={metrics.missed} tone="missed" />
-      <StatCard
-        label="Upcoming Today's Schedule"
-        value={metrics.upcoming}
-        tone="upcoming"
-      />
-      <StatCard
-        label="Today's Completed Schedule"
-        value={metrics.completed}
-        tone="completed"
-      />
-    </div>
+    <>
+      {/* Mobile layout: 1 full-width card (Missed), then 2 cards side-by-side */}
+      <div className="mb-8 md:hidden">
+        <div className="mb-4">
+          <StatCard
+            label="Missed Scheduled"
+            value={metrics.missed}
+            tone="missed"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard
+            label="Upcoming Today's Schedule"
+            value={metrics.upcoming}
+            tone="upcoming"
+          />
+          <StatCard
+            label="Today's Completed Schedule"
+            value={metrics.completed}
+            tone="completed"
+          />
+        </div>
+      </div>
+
+      {/* Desktop/tablet layout: 3 columns */}
+      <div className="mb-8 hidden grid-cols-3 gap-4 md:grid">
+        <StatCard
+          label="Missed Scheduled"
+          value={metrics.missed}
+          tone="missed"
+        />
+        <StatCard
+          label="Upcoming Today's Schedule"
+          value={metrics.upcoming}
+          tone="upcoming"
+        />
+        <StatCard
+          label="Today's Completed Schedule"
+          value={metrics.completed}
+          tone="completed"
+        />
+      </div>
+    </>
   );
 });
 
@@ -150,7 +181,8 @@ ScheduleItem.displayName = 'ScheduleItem';
 const DashboardContent: React.FC<{
   todaySchedules: ScheduleSummary[];
   activeVisit: ScheduleSummary | undefined;
-}> = memo(({ todaySchedules, activeVisit }) => {
+  caregiverName: string;
+}> = memo(({ todaySchedules, activeVisit, caregiverName }) => {
   const endMutation = useEndSchedule(activeVisit?.id || '');
 
   const metrics = useMemo(
@@ -201,7 +233,12 @@ const DashboardContent: React.FC<{
         <DashboardHeader />
 
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 md:block hidden">
+            Dashboard
+          </h1>
+          <h1 className="text-2xl font-semibold text-gray-900 md:hidden">
+            Welcome, {caregiverName} !
+          </h1>
         </div>
 
         {activeVisit && (
@@ -262,6 +299,7 @@ const DashboardContent: React.FC<{
 DashboardContent.displayName = 'DashboardContent';
 
 export const DashboardPage: React.FC = () => {
+  const { caregiver } = useAuth();
   const {
     data: todayData,
     isLoading: loadingToday,
@@ -299,6 +337,7 @@ export const DashboardPage: React.FC = () => {
     <DashboardContent
       todaySchedules={todaySchedules}
       activeVisit={activeVisit}
+      caregiverName={caregiver?.name || 'Guest'}
     />
   );
 };
