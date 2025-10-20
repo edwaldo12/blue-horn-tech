@@ -1,21 +1,42 @@
-import clsx from 'clsx'
-import type { ScheduleStatus } from '../../types'
+import clsx from 'clsx';
+import type { ScheduleStatus } from '../../types';
 
-const statusConfig: Record<
-  ScheduleStatus,
-  {
-    label: string
-    className: string
-  }
-> = {
-  scheduled: { label: 'Scheduled', className: 'badge badge-outline border-primary text-primary' },
-  in_progress: { label: 'In progress', className: 'badge badge-warning text-white border-transparent' },
-  completed: { label: 'Completed', className: 'badge badge-success text-white border-transparent' },
-  cancelled: { label: 'Cancelled', className: 'badge badge-error text-white border-transparent' },
-  missed: { label: 'Missed', className: 'badge badge-secondary text-white border-transparent' },
-}
+const statusConfig: Record<ScheduleStatus, string> = {
+  scheduled: 'Scheduled',
+  in_progress: 'In progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  missed: 'Missed',
+};
 
-export const StatusBadge: React.FC<{ status: ScheduleStatus }> = ({ status }) => {
-  const config = statusConfig[status]
-  return <span className={clsx('badge font-medium uppercase tracking-wide', config.className)}>{config.label}</span>
-}
+export const StatusBadge: React.FC<{ status: ScheduleStatus }> = ({
+  status,
+}) => {
+  const getStatusStyle = (status: ScheduleStatus) => {
+    switch (status) {
+      case 'cancelled':
+        return { backgroundColor: '#D32F2F', color: 'white' };
+      case 'completed':
+        return { backgroundColor: '#2E7D32', color: 'white' };
+      case 'in_progress':
+        return { backgroundColor: '#ED6C02', color: 'white' };
+      case 'scheduled':
+        return { backgroundColor: '#616161', color: 'white' };
+      case 'missed':
+        return { backgroundColor: '#757575', color: 'white' };
+      default:
+        return { backgroundColor: '#9E9E9E', color: 'white' };
+    }
+  };
+
+  const style = getStatusStyle(status);
+
+  return (
+    <span
+      className="badge font-medium px-3 py-1 rounded-full text-xs"
+      style={style}
+    >
+      {statusConfig[status]}
+    </span>
+  );
+};

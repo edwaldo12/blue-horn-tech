@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSchedules, useTodaySchedules } from '../../hooks/useSchedules';
 import { LoadingScreen } from '../../components/common/LoadingScreen';
@@ -148,10 +147,17 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {activeVisit && (
-          <ActiveVisitCard
-            schedule={activeVisit}
-            onClockOut={() => navigate(`/schedule/${activeVisit.id}/progress`)}
-          />
+          <div
+            className="mb-8 rounded-2xl p-6 text-white shadow-lg"
+            style={{ backgroundColor: '#0D5D59' }}
+          >
+            <ActiveVisitCard
+              schedule={activeVisit}
+              onClockOut={() =>
+                navigate(`/schedule/${activeVisit.id}/progress`)
+              }
+            />
+          </div>
         )}
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
