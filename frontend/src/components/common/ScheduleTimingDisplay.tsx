@@ -16,7 +16,10 @@ export const ScheduleTimingDisplay: React.FC<ScheduleTimingDisplayProps> = memo(
         <div className="grid grid-cols-3 items-center justify-items-center text-sm text-gray-600">
           {/* Left Section - Date */}
           <div className="flex items-center gap-1">
-            <span className="material-symbols-rounded text-base text-[#0D5D59]">
+            <span
+              className="material-symbols-rounded text-base"
+              style={{ color: '#02CAD1' }}
+            >
               calendar_month
             </span>
             <span>{startTime.format('ddd, DD MMM YYYY')}</span>
@@ -27,7 +30,10 @@ export const ScheduleTimingDisplay: React.FC<ScheduleTimingDisplayProps> = memo(
 
           {/* Right Section - Time */}
           <div className="flex items-center gap-1">
-            <span className="material-symbols-rounded text-base text-[#0D5D59]">
+            <span
+              className="material-symbols-rounded text-base"
+              style={{ color: '#02CAD1' }}
+            >
               schedule
             </span>
             <span>{`${startTime.format('HH:mm')} - ${endTime.format(
