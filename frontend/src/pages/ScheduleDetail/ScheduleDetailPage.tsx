@@ -57,14 +57,21 @@ export const ScheduleDetailPage: React.FC = () => {
         />
 
         <div className="mb-6">
-          <button
-            type="button"
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-            onClick={() => navigate(-1)}
-          >
-            <span className="material-symbols-rounded">arrow_back</span>
-            <span className="text-lg font-semibold">Schedule Details</span>
-          </button>
+          <div className="flex items-center relative">
+            <button
+              type="button"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 md:gap-2"
+              onClick={() => navigate(-1)}
+            >
+              <span className="material-symbols-rounded">arrow_back</span>
+              <span className="text-lg font-semibold md:block hidden">
+                Schedule Details
+              </span>
+            </button>
+            <span className="text-lg font-semibold text-gray-900 md:hidden absolute left-1/2 transform -translate-x-1/2">
+              Schedule Details
+            </span>
+          </div>
         </div>
 
         <ScheduleDetailCard schedule={schedule} onClockIn={handleClockIn} />

@@ -119,7 +119,7 @@ export const ScheduleProgressPage: React.FC = () => {
     }
 
     try {
-      await endMutation.mutateAsync({ latitude, longitude });
+      // await endMutation.mutateAsync({ latitude, longitude });
       setShowCompletedModal(true);
     } catch (error) {
       console.error('Clock-out failed:', error);
@@ -143,14 +143,21 @@ export const ScheduleProgressPage: React.FC = () => {
         />
 
         <div className="mb-6">
-          <button
-            type="button"
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-            onClick={() => navigate(-1)}
-          >
-            <span className="material-symbols-rounded">arrow_back</span>
-            <span className="text-lg font-semibold">Clock-Out</span>
-          </button>
+          <div className="flex items-center relative">
+            <button
+              type="button"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 md:gap-2"
+              onClick={() => navigate(-1)}
+            >
+              <span className="material-symbols-rounded">arrow_back</span>
+              <span className="text-lg font-semibold md:block hidden">
+                Clock-Out
+              </span>
+            </button>
+            <span className="text-lg font-semibold text-gray-900 md:hidden absolute left-1/2 transform -translate-x-1/2">
+              Clock-Out
+            </span>
+          </div>
         </div>
 
         {/* Timer Display - Current Real Time */}

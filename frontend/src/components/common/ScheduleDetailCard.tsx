@@ -26,8 +26,8 @@ export const ScheduleDetailCard: React.FC<ScheduleDetailCardProps> = ({
             {schedule.service_name}
           </h1>
 
-          {/* Profile and Info - Centered */}
-          <div className="flex flex-col items-center gap-4">
+          {/* Profile and Info - Side by Side */}
+          <div className="flex items-center justify-center gap-4 pb-2">
             <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden">
               <img
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
@@ -37,7 +37,7 @@ export const ScheduleDetailCard: React.FC<ScheduleDetailCardProps> = ({
                 className="w-full h-full object-cover"
               />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 text-center">
+            <h3 className="text-lg font-semibold text-gray-900">
               {schedule.client.full_name}
             </h3>
           </div>
@@ -47,19 +47,20 @@ export const ScheduleDetailCard: React.FC<ScheduleDetailCardProps> = ({
             className="rounded-lg p-2 w-full"
             style={{ backgroundColor: '#2DA6FF14' }}
           >
-            <div className="grid grid-cols-3 items-center justify-items-center text-sm text-gray-600">
-              {/* Left Section - Date */}
-              <div className="flex items-center gap-1">
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+              {/* Date Section */}
+              <div className="flex items-center gap-1 mr-2">
                 <span className="material-symbols-rounded text-base text-[#0D5D59]">
                   calendar_month
                 </span>
                 <span>{start.format('ddd, DD MMM YYYY')}</span>
               </div>
 
-              {/* Center Section - Line Separator */}
-              <div className="text-gray-400">|</div>
-              {/* Right Section - Time */}
-              <div className="flex items-center gap-1">
+              {/* Separator */}
+              <span className="text-gray-400">|</span>
+
+              {/* Time Section */}
+              <div className="flex items-center gap-1 ml-2">
                 <span className="material-symbols-rounded text-base text-[#0D5D59]">
                   schedule
                 </span>
