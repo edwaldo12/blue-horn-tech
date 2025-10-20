@@ -1,7 +1,7 @@
-import { useCallback, useMemo, memo } from 'react';
+import { useCallback, useMemo, memo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  useSchedules,
+  useInfiniteSchedules,
   useTodaySchedules,
   useEndSchedule,
 } from '@/hooks/useSchedules';
@@ -10,6 +10,7 @@ import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { ErrorState } from '@/components/common/ErrorState';
 import { StatCard } from '@/components/common/StatCard';
 import { ScheduleCard } from '@/components/common/ScheduleCard';
+import { ScheduleCardSkeleton } from '@/components/common/ScheduleCardSkeleton';
 import { EmptyState } from '@/components/common/EmptyState';
 import { HeaderDropdown } from '@/components/common/HeaderDropdown';
 import { ActiveVisitCard } from '@/components/common/ActiveVisitCard';
@@ -187,8 +188,44 @@ const DashboardContent: React.FC<{
   todaySchedules: ScheduleSummary[];
   activeVisit: ScheduleSummary | undefined;
   caregiverName: string;
-}> = memo(({ todaySchedules, activeVisit, caregiverName }) => {
+  schedules: ScheduleSummary[];
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
+  isFetchingNextPage: boolean;
+}> = memo(({
+  todaySchedules,
+  activeVisit,
+  caregiverName,
+  schedules,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage
+}) => {
   const endMutation = useEndSchedule(activeVisit?.id || '');
+  const observer = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // Set up intersection observer for infinite scroll
+  useEffect(() => {
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const metrics = useMemo(
     () => ({
@@ -211,10 +248,10 @@ const DashboardContent: React.FC<{
       cancelled: 4,
     };
 
-    return todaySchedules
+    return schedules
       .slice()
       .sort((a, b) => priority[a.status] - priority[b.status]);
-  }, [todaySchedules]);
+  }, [schedules]);
 
   const handleClockOut = useCallback(async () => {
     if (!activeVisit) return;
@@ -287,6 +324,14 @@ const DashboardContent: React.FC<{
               {orderedSchedules.map((schedule) => (
                 <ScheduleItem key={schedule.id} schedule={schedule} />
               ))}
+              {/* Show skeleton cards when fetching next page */}
+              {isFetchingNextPage && Array.from({ length: 5 }).map((_, index) => (
+                <ScheduleCardSkeleton key={`skeleton-${index}`} />
+              ))}
+              {/* Load more trigger for infinite scroll */}
+              {hasNextPage && !isFetchingNextPage && (
+                <div ref={loadMoreRef} className="h-8"></div> // Invisible element to trigger intersection
+              )}
             </div>
           )}
         </section>
@@ -306,29 +351,37 @@ export const DashboardPage: React.FC = () => {
     refetch: refetchToday,
   } = useTodaySchedules();
   const {
-    data: schedules,
+    data: schedulesData,
     isLoading: loadingAll,
     isError: errorAll,
-    refetch: refetchAll,
-  } = useSchedules();
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteSchedules();
 
   // Memoize todaySchedules to prevent unnecessary re-computations
   const todaySchedules = useMemo(() => todayData || [], [todayData]);
 
+  // Flatten all pages of schedules
+  const schedules = useMemo(
+    () => schedulesData?.pages?.flatMap(page => page?.data || []) || [],
+    [schedulesData]
+  );
+
   const activeVisit = useMemo(
-    () => schedules?.find((item) => item.status === 'in_progress'),
+    () => schedules.find((item) => item.status === 'in_progress'),
     [schedules]
   );
 
   const handleRetry = useCallback(() => {
-    void Promise.all([refetchToday(), refetchAll()]);
-  }, [refetchToday, refetchAll]);
+    void refetchToday();
+  }, [refetchToday]);
 
   if (loadingToday || loadingAll) {
     return <LoadingScreen message="Loading your schedules..." />;
   }
 
-  if (errorToday || errorAll || !schedules) {
+  if (errorToday || errorAll) {
     return <ErrorState onRetry={handleRetry} />;
   }
 
@@ -337,6 +390,10 @@ export const DashboardPage: React.FC = () => {
       todaySchedules={todaySchedules}
       activeVisit={activeVisit}
       caregiverName={caregiver?.name || 'Guest'}
+      schedules={schedules}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={isFetchingNextPage}
     />
   );
 };

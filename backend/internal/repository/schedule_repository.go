@@ -13,6 +13,9 @@ type ScheduleFilter struct {
 	Date       *time.Time
 	TodayOnly  bool
 	WithClient bool
+	// Pagination parameters
+	Limit      int
+	Offset     int
 }
 
 // ScheduleRepository defines the persistence contract for schedule operations.

@@ -1,17 +1,20 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
   createTask,
   endSchedule,
   fetchScheduleById,
   fetchSchedules,
+  fetchTodaySchedules,
   startSchedule,
   updateTaskStatus,
+  type PaginatedSchedulesResponse,
 } from '@/api/schedules';
 import type {
   ScheduleDetail,
   ScheduleSummary,
   UpdateTaskPayload,
   VisitEventPayload,
+  TodaySchedulesResponse,
 } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -22,15 +25,29 @@ export const schedulesKeys = {
 };
 
 export const useSchedules = () =>
-  useQuery<ScheduleSummary[]>({
+  useQuery<PaginatedSchedulesResponse>({
     queryKey: schedulesKeys.all,
-    queryFn: fetchSchedules,
+    queryFn: () => fetchSchedules(5, 0), // Default to 5 items, starting from 0
   });
 
 export const useTodaySchedules = () =>
-  useQuery<ScheduleSummary[]>({
+  useQuery<TodaySchedulesResponse, Error, ScheduleSummary[]>({
     queryKey: schedulesKeys.today,
-    queryFn: fetchSchedules,
+    queryFn: fetchTodaySchedules, // This remains unchanged as it's not paginated
+    select: (data) => data.data, // Extract just the data array
+  });
+
+export const useInfiniteSchedules = () =>
+  useInfiniteQuery<PaginatedSchedulesResponse>({
+    queryKey: [...schedulesKeys.all, 'infinite'],
+    queryFn: ({ pageParam = 0 }) => fetchSchedules(5, pageParam as number),
+    getNextPageParam: (lastPage) => {
+      if (lastPage?.pagination?.hasMore) {
+        return lastPage.pagination.offset + lastPage.pagination.limit;
+      }
+      return undefined;
+    },
+    initialPageParam: 0,
   });
 
 export const useScheduleDetail = (id: string) =>

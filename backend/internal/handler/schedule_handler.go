@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -41,6 +42,23 @@ func (h *ScheduleHandler) ListSchedules(c *gin.Context) {
 			filter.Date = &parsed
 		}
 	}
+	
+	// Parse pagination parameters
+	if limitStr := c.Query("limit"); limitStr != "" {
+		if limit, err := strconv.Atoi(limitStr); err == nil && limit > 0 {
+			filter.Limit = limit
+		}
+	}
+	if offsetStr := c.Query("offset"); offsetStr != "" {
+		if offset, err := strconv.Atoi(offsetStr); err == nil && offset >= 0 {
+			filter.Offset = offset
+		}
+	}
+	
+	// Set default limit if not provided
+	if filter.Limit == 0 {
+		filter.Limit = 20
+	}
 
 	summaries, err := h.scheduleUC.ListSchedules(c, caregiverID, filter)
 	if err != nil {
@@ -61,7 +79,17 @@ func (h *ScheduleHandler) ListSchedules(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": data})
+	// Include pagination info in response
+	response := gin.H{
+		"data": data,
+		"pagination": gin.H{
+			"limit":  filter.Limit,
+			"offset": filter.Offset,
+			"hasMore": len(data) == filter.Limit, // If we got exactly limit items, there might be more
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // GetSchedule returns a single schedule detail.

@@ -74,6 +74,18 @@ func (r *ScheduleRepository) ListSchedules(ctx context.Context, caregiverID stri
 
 	query += " ORDER BY s.start_time ASC"
 
+	// Add pagination if limit is specified
+	if filter.Limit > 0 {
+		query += " LIMIT $" + itoa(argPosition)
+		args = append(args, filter.Limit)
+		argPosition++
+		
+		if filter.Offset > 0 {
+			query += " OFFSET $" + itoa(argPosition)
+			args = append(args, filter.Offset)
+		}
+	}
+
 	rows := []scheduleSummaryRow{}
 	if err := r.db.SelectContext(ctx, &rows, query, args...); err != nil {
 		return nil, err

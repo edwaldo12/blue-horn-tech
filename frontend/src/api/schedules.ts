@@ -7,9 +7,22 @@ import type {
   VisitEventPayload,
 } from '@/types'
 
-export async function fetchSchedules(): Promise<ScheduleSummary[]> {
-  const { data } = await apiClient.get<{ data: ScheduleSummary[] }>('/schedules')
-  return data.data
+export interface PaginatedSchedulesResponse {
+  data: ScheduleSummary[];
+  pagination: {
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+}
+
+export async function fetchSchedules(limit?: number, offset?: number): Promise<PaginatedSchedulesResponse> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (offset) params.append('offset', offset.toString());
+  
+  const { data } = await apiClient.get<PaginatedSchedulesResponse>(`/schedules?${params.toString()}`)
+  return data
 }
 
 export async function fetchTodaySchedules(): Promise<TodaySchedulesResponse> {
