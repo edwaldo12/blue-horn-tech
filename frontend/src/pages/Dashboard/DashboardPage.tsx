@@ -276,12 +276,6 @@ const DashboardContent: React.FC<{
                 {orderedSchedules.length}
               </span>
             </div>
-            <button
-              type="button"
-              className="text-sm font-medium text-[#0D9488] hover:text-[#0D9488]/80"
-            >
-              See All
-            </button>
           </div>
           {orderedSchedules.length === 0 ? (
             <EmptyState
