@@ -150,6 +150,11 @@ const ScheduleItem: React.FC<{ schedule: ScheduleSummary }> = memo(
         };
       }
 
+      // For cancelled schedules, don't show any buttons
+      if (schedule.status === 'cancelled') {
+        return {};
+      }
+
       return {
         primary: {
           label: 'View details',
