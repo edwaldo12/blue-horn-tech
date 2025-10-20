@@ -1,10 +1,6 @@
 import { memo } from 'react';
 import clsx from 'clsx';
-import type {
-  ScheduleDetail,
-  ScheduleSummary,
-  ScheduleStatus,
-} from '@/types';
+import type { ScheduleDetail, ScheduleSummary, ScheduleStatus } from '@/types';
 
 interface ActionConfig {
   label: string;

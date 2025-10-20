@@ -15,7 +15,10 @@ export const AppLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      <nav className="border-t border-base-200 bg-white shadow-sm md:hidden">
+      <nav
+        className="border-t border-base-200 shadow-sm md:hidden"
+        style={{ backgroundColor: '#F5FBFF' }}
+      >
         <div className="mx-auto flex max-w-md items-center justify-around py-3">
           {tabs.map((tab) => {
             const isActive = location.pathname === tab.path;
@@ -25,8 +28,9 @@ export const AppLayout: React.FC = () => {
                 to={tab.path}
                 className={clsx(
                   'flex flex-col items-center gap-1 text-xs font-medium transition-colors',
-                  isActive ? 'text-primary' : 'text-neutral-400'
+                  isActive ? '' : 'text-neutral-400'
                 )}
+                style={isActive ? { color: '#0D5D59' } : {}}
               >
                 <span className="material-symbols-rounded text-2xl">
                   {tab.icon}

@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import dayjs from 'dayjs';
 import { useScheduleDetail, useStartSchedule } from '@/hooks/useSchedules';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -18,21 +17,9 @@ export const ScheduleDetailPage: React.FC = () => {
     refetch,
   } = useScheduleDetail(scheduleId);
   const startMutation = useStartSchedule(scheduleId);
-  const {
-    coords,
-    error: geoError,
-    loading: locating,
-    requestPosition,
-  } = useGeolocation();
-  const [manualLat, setManualLat] = useState('');
-  const [manualLng, setManualLng] = useState('');
-
-  const canClockIn = useMemo(
-    () => schedule?.status === 'scheduled' || schedule?.status === 'missed',
-    [schedule]
-  );
-  const showProgress = schedule?.status === 'in_progress';
-  const isCompleted = schedule?.status === 'completed';
+  const { coords } = useGeolocation();
+  const [manualLat] = useState('');
+  const [manualLng] = useState('');
 
   if (isLoading) {
     return <LoadingScreen message="Preparing schedule details..." />;
