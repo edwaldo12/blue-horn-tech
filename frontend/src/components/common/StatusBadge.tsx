@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import type { ScheduleStatus } from '../../types';
+import type { ScheduleStatus } from '@/types';
 
 const statusConfig: Record<ScheduleStatus, string> = {
   scheduled: 'Scheduled',

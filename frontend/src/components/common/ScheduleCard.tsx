@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import dayjs from 'dayjs';
-import type { ScheduleDetail, ScheduleSummary } from '../../types';
-import { StatusBadge } from './StatusBadge';
+import type { ScheduleDetail, ScheduleSummary } from '@/types';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { ScheduleProfileSection } from './ScheduleProfileSection';
 import { ScheduleLocationDisplay } from './ScheduleLocationDisplay';
 import { ScheduleTimingDisplay } from './ScheduleTimingDisplay';

@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { useScheduleDetail, useStartSchedule } from '../../hooks/useSchedules';
-import { LoadingScreen } from '../../components/common/LoadingScreen';
-import { ErrorState } from '../../components/common/ErrorState';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { ScheduleDetailCard } from '../../components/common/ScheduleDetailCard';
-import { useGeolocation } from '../../hooks/useGeolocation';
+import { useScheduleDetail, useStartSchedule } from '@/hooks/useSchedules';
+import { LoadingScreen } from '@/components/common/LoadingScreen';
+import { ErrorState } from '@/components/common/ErrorState';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { ScheduleDetailCard } from '@/components/common/ScheduleDetailCard';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 export const ScheduleDetailPage: React.FC = () => {
   const { scheduleId = '' } = useParams<{ scheduleId: string }>();

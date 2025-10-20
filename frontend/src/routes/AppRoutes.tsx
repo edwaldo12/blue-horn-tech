@@ -1,11 +1,11 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { AppLayout } from '../components/layout/AppLayout'
-import { DashboardPage } from '../pages/Dashboard/DashboardPage'
-import { ScheduleDetailPage } from '../pages/ScheduleDetail/ScheduleDetailPage'
-import { ScheduleProgressPage } from '../pages/ScheduleProgress/ScheduleProgressPage'
-import { ProfilePage } from '../pages/Profile/ProfilePage'
-import { useAuth } from '../hooks/useAuth'
-import { LoadingScreen } from '../components/common/LoadingScreen'
+import { AppLayout } from '@/components/layout/AppLayout'
+import { DashboardPage } from '@/pages/Dashboard/DashboardPage'
+import { ScheduleDetailPage } from '@/pages/ScheduleDetail/ScheduleDetailPage'
+import { ScheduleProgressPage } from '@/pages/ScheduleProgress/ScheduleProgressPage'
+import { ProfilePage } from '@/pages/Profile/ProfilePage'
+import { useAuth } from '@/hooks/useAuth'
+import { LoadingScreen } from '@/components/common/LoadingScreen'
 
 export const AppRoutes: React.FC = () => {
   const { loading } = useAuth()

@@ -4,16 +4,16 @@ import {
   useEndSchedule,
   useScheduleDetail,
   useUpdateTaskStatus,
-} from '../../hooks/useSchedules';
-import { LoadingScreen } from '../../components/common/LoadingScreen';
-import { ErrorState } from '../../components/common/ErrorState';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { RealTimeClock } from '../../components/common/RealTimeClock';
-import { useGeolocation } from '../../hooks/useGeolocation';
-import { useReverseGeocode } from '../../hooks/useReverseGeocode';
-import { LocationMapPreview } from '../../components/common/LocationMapPreview';
-import { ScheduleCompletedModal } from '../../components/common/ScheduleCompletedModal';
-import type { Task } from '../../types';
+} from '@/hooks/useSchedules';
+import { LoadingScreen } from '@/components/common/LoadingScreen';
+import { ErrorState } from '@/components/common/ErrorState';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { RealTimeClock } from '@/components/common/RealTimeClock';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { useReverseGeocode } from '@/hooks/useReverseGeocode';
+import { LocationMapPreview } from '@/components/common/LocationMapPreview';
+import { ScheduleCompletedModal } from '@/components/common/ScheduleCompletedModal';
+import type { Task } from '@/types';
 
 export const ScheduleProgressPage: React.FC = () => {
   const { scheduleId = '' } = useParams<{ scheduleId: string }>();
@@ -119,8 +119,7 @@ export const ScheduleProgressPage: React.FC = () => {
     }
 
     try {
-      // await endMutation.mutateAsync({ latitude, longitude });
-      console.log('ASDASDASD');
+      await endMutation.mutateAsync({ latitude, longitude });
       setShowCompletedModal(true);
     } catch (error) {
       console.error('Clock-out failed:', error);

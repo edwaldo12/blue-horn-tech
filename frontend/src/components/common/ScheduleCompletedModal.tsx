@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ScheduleDetail } from '../../types';
-import { formatTime, formatDate } from '../../utils/format';
+import type { ScheduleDetail } from '@/types';
+import { formatTime, formatDate } from '@/utils/format';
 
 interface ScheduleCompletedModalProps {
   schedule: ScheduleDetail;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getApiBaseUrl } from '../utils/env';
+import { getApiBaseUrl } from '@/utils/env';
 
 const baseURL = getApiBaseUrl();
 

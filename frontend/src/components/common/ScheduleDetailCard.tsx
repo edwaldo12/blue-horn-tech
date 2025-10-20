@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import type { ScheduleDetail } from '../../types';
+import type { ScheduleDetail } from '@/types';
 
 interface ScheduleDetailCardProps {
   schedule: ScheduleDetail;

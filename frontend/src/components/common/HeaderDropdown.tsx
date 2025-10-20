@@ -65,13 +65,15 @@ export const HeaderDropdown: React.FC<HeaderDropdownProps> = memo(
             expand_more
           </button>
           {isOpen && (
-            <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+            <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
               <button
                 onClick={onLogout}
-                className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
-                style={{ color: '#1D1D1B' }}
+                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
-                Log Out
+                <span className="material-symbols-rounded text-base">
+                  logout
+                </span>
+                <span>Sign Out</span>
               </button>
             </div>
           )}

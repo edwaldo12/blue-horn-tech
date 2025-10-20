@@ -1,4 +1,4 @@
-import { useAuth } from '../../hooks/useAuth'
+import { useAuth } from '@/hooks/useAuth'
 
 export const ProfilePage: React.FC = () => {
   const { caregiver, refreshToken } = useAuth()

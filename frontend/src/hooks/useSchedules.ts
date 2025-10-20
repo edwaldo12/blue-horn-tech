@@ -6,13 +6,13 @@ import {
   fetchSchedules,
   startSchedule,
   updateTaskStatus,
-} from '../api/schedules';
+} from '@/api/schedules';
 import type {
   ScheduleDetail,
   ScheduleSummary,
   UpdateTaskPayload,
   VisitEventPayload,
-} from '../types';
+} from '@/types';
 import toast from 'react-hot-toast';
 
 export const schedulesKeys = {

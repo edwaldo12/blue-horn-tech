@@ -1,4 +1,4 @@
-import { HeaderDropdown } from '../common/HeaderDropdown';
+import { HeaderDropdown } from '@/components/common/HeaderDropdown';
 
 interface PageHeaderProps {
   title: string;

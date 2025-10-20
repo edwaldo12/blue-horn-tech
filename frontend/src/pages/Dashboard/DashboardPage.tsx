@@ -4,15 +4,15 @@ import {
   useSchedules,
   useTodaySchedules,
   useEndSchedule,
-} from '../../hooks/useSchedules';
-import { LoadingScreen } from '../../components/common/LoadingScreen';
-import { ErrorState } from '../../components/common/ErrorState';
-import { StatCard } from '../../components/common/StatCard';
-import { ScheduleCard } from '../../components/common/ScheduleCard';
-import { EmptyState } from '../../components/common/EmptyState';
-import { HeaderDropdown } from '../../components/common/HeaderDropdown';
-import { ActiveVisitCard } from '../../components/common/ActiveVisitCard';
-import type { ScheduleStatus, ScheduleSummary } from '../../types';
+} from '@/hooks/useSchedules';
+import { LoadingScreen } from '@/components/common/LoadingScreen';
+import { ErrorState } from '@/components/common/ErrorState';
+import { StatCard } from '@/components/common/StatCard';
+import { ScheduleCard } from '@/components/common/ScheduleCard';
+import { EmptyState } from '@/components/common/EmptyState';
+import { HeaderDropdown } from '@/components/common/HeaderDropdown';
+import { ActiveVisitCard } from '@/components/common/ActiveVisitCard';
+import type { ScheduleStatus, ScheduleSummary } from '@/types';
 
 // Memoized header component
 const DashboardHeader: React.FC = memo(() => {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { requestToken } from '../api/auth'
-import type { TokenResponse } from '../types'
-import { AuthContext } from './auth-context'
+import { requestToken } from '@/api/auth'
+import type { TokenResponse } from '@/types'
+import { AuthContext } from '@/context/auth-context'
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem('access_token'))

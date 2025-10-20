@@ -1,6 +1,6 @@
 import axios from 'axios'
-import type { TokenResponse } from '../types'
-import { getApiBaseUrl, getClientId, getClientSecret } from '../utils/env'
+import type { TokenResponse } from '@/types'
+import { getApiBaseUrl, getClientId, getClientSecret } from '@/utils/env'
 
 export async function requestToken(): Promise<TokenResponse> {
   const url = `${getApiBaseUrl()}/auth/token`

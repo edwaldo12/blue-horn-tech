@@ -1,6 +1,6 @@
 import React from 'react';
-import type { ScheduleSummary } from '../../types';
-import { RealTimeClock } from './RealTimeClock';
+import type { ScheduleSummary } from '@/types';
+import { RealTimeClock } from '@/components/common/RealTimeClock';
 
 interface ActiveVisitCardProps {
   schedule: ScheduleSummary;

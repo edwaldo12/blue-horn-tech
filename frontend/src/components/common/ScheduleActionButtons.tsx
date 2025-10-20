@@ -4,7 +4,7 @@ import type {
   ScheduleDetail,
   ScheduleSummary,
   ScheduleStatus,
-} from '../../types';
+} from '@/types';
 
 interface ActionConfig {
   label: string;
@@ -18,15 +18,19 @@ interface ScheduleActionButtonsProps {
   secondaryAction?: ActionConfig;
 }
 
-const getButtonStyle = (isPrimary = false) => {
+const getButtonStyle = (isPrimary = false, status?: ScheduleStatus) => {
   if (isPrimary) {
+    // For completed schedules, use outline style for "View Report"
+    if (status === 'completed') {
+      return 'bg-transparent border hover:bg-gray-50 text-[#0D5D59]';
+    }
     return 'bg-[#0D5D59] hover:bg-[#0D5D59]/90 text-white';
   }
   return 'bg-white hover:bg-gray-50 text-[#0D5D59]';
 };
 
 const getSecondaryButtonStyle = () => {
-  return 'bg-white border hover:bg-gray-50 text-[#0D5D59]';
+  return 'bg-transparent border hover:bg-gray-50 text-[#0D5D59]';
 };
 
 const shouldShowSecondaryButton = (status: ScheduleStatus): boolean => {
@@ -78,8 +82,13 @@ export const ScheduleActionButtons: React.FC<ScheduleActionButtonsProps> = memo(
                 schedule.status,
                 showSecondaryButton && !!secondaryAction
               ),
-              getButtonStyle(true)
+              getButtonStyle(true, schedule.status)
             )}
+            style={
+              schedule.status === 'completed'
+                ? { borderColor: '#2DA6FF80' }
+                : {}
+            }
           >
             {primaryAction.label}
           </button>
