@@ -167,27 +167,37 @@ export const ScheduleProgressPage: React.FC = () => {
                       type="button"
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         task.status === 'completed'
-                          ? 'bg-green-100 text-green-800 border border-green-200'
-                          : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                          ? 'text-gray-900'
+                          : 'text-gray-600'
                       }`}
+                      style={{
+                        backgroundColor:
+                          task.status === 'completed'
+                            ? '#2DA6FF1F'
+                            : 'transparent',
+                      }}
                       onClick={() => handleTaskUpdate(task, 'completed')}
                       disabled={updateTaskMutation.isPending}
                     >
-                      {task.status === 'completed' && (
-                        <span className="material-symbols-rounded text-green-600 text-lg">
-                          check
-                        </span>
-                      )}
+                      <span className="text-green-600 text-xl">✓</span>
                       Yes
                     </button>
                     <div className="text-gray-400">|</div>
                     <button
                       type="button"
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        task.status === 'not_completed'
-                          ? 'bg-red-100 text-red-800 border border-red-200'
-                          : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                        task.status === 'not_completed' ||
+                        reasonDrafts[task.id] !== undefined
+                          ? 'text-gray-900'
+                          : 'text-gray-600'
                       }`}
+                      style={{
+                        backgroundColor:
+                          task.status === 'not_completed' ||
+                          reasonDrafts[task.id] !== undefined
+                            ? '#2DA6FF1F'
+                            : 'transparent',
+                      }}
                       onClick={() =>
                         setReasonDrafts((prev) => ({
                           ...prev,
@@ -195,11 +205,7 @@ export const ScheduleProgressPage: React.FC = () => {
                         }))
                       }
                     >
-                      {task.status === 'not_completed' && (
-                        <span className="material-symbols-rounded text-red-600 text-lg">
-                          close
-                        </span>
-                      )}
+                      <span className="text-red-600 text-xl">✗</span>
                       No
                     </button>
                   </div>
