@@ -26,31 +26,32 @@ frontend/
     types/         # Shared TypeScript interfaces
 ```
 
-## Setup
+## Prerequisites
 
-1. Install dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
+- Node.js 20 (or 18+) and npm
+- Backend API running locally on `http://localhost:8080` (see [`../backend/README.md`](../backend/README.md))
 
-2. Create a `.env` (see `.env.example`):
-   ```ini
-   VITE_API_URL=http://localhost:8080/api
-   VITE_CLIENT_ID=caregiver-app
-   VITE_CLIENT_SECRET=caregiver-secret
-   VITE_DEFAULT_CAREGIVER_ID=c2d1bb61-8d67-4db5-9e59-4c2c16f7d4f2
-   ```
+## Quick start
 
-3. Start the dev server (backend must be running on the configured base URL):
-   ```bash
-   npm run dev
-   ```
+```bash
+# 1. Install dependencies
+cd frontend
+npm install
 
-4. Build for production:
-   ```bash
-   npm run build
-   ```
+# 2. Configure environment variables (creates frontend/.env)
+cp .env.example .env
+# Adjust values if your backend runs on a different host/port.
+
+# 3. Run the app (opens http://localhost:5173)
+npm run dev
+```
+
+For a production build:
+
+```bash
+npm run build
+npm run preview   # optional: serve the built app locally
+```
 
 ## Key Features
 

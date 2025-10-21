@@ -33,7 +33,8 @@ backend/
 ## Prerequisites
 
 - Go 1.22+
-- PostgreSQL 14+
+- Docker (recommended for local PostgreSQL)
+- Alternatively: PostgreSQL 14+ installed locally
 
 ## Configuration
 
@@ -49,18 +50,42 @@ Key variables:
 - `DB_*` – Postgres connection settings.
 - `AUTH_*` – secrets + token metadata for the pseudo-OIDC flow. Update the secrets for production use.
 
+## Quick start (recommended)
+
+Use Docker Compose (provided in the repository root) to start PostgreSQL and run the API. From the repository root run:
+
+```bash
+# 1. Start PostgreSQL
+docker compose up -d postgres
+
+# 2. Copy env configuration (edit if needed)
+cp backend/.env.example backend/.env
+
+# 3. Apply the SQL migrations (seeds demo data)
+docker compose exec -T postgres psql -U postgres -d care_tracker < backend/migrations/0001_init.sql
+docker compose exec -T postgres psql -U postgres -d care_tracker < backend/migrations/0002_logs_caregivers.sql
+
+# 4. Start the API
+cd backend
+go run ./cmd
+```
+
+When the server prints `🚀 care-shift-tracker` it is ready on `http://localhost:8080`. Press `ctrl+c` to stop it, then tear down the database with `docker compose down` (or keep it running for the frontend).
+
 ## Database Setup
+
+If you prefer a locally installed Postgres, create the database and run the migrations manually:
 
 1. Create the database:
    ```bash
    createdb care_tracker
    ```
-2. Run the migration SQL (includes request log storage):
+2. Run the migration SQL (includes seed data and attendance logs table):
    ```bash
-   psql "$DB_USER" -h $DB_HOST -d $DB_NAME -f migrations/0001_init.sql
-   psql "$DB_USER" -h $DB_HOST -d $DB_NAME -f migrations/0002_request_logs.sql
+   psql "$DB_USER" -h "$DB_HOST" -d "$DB_NAME" -f migrations/0001_init.sql
+   psql "$DB_USER" -h "$DB_HOST" -d "$DB_NAME" -f migrations/0002_logs_caregivers.sql
    ```
-   (Ensure the environment variables in your shell line up with `.env`).
+   (Ensure the environment variables in your shell line up with `.env`.)
 
 The migration seeds a default caregiver, schedules, tasks, and an OAuth client (`caregiver-app`) with the plaintext secret `caregiver-secret` (hashed in the DB).
 
@@ -68,14 +93,14 @@ The migration seeds a default caregiver, schedules, tasks, and an OAuth client (
 
 ```bash
 cd backend
-go run ./cmd/api
+go run ./cmd
 ```
 
 or build and run:
 
 ```bash
 cd backend
-go build -o bin/api ./cmd/api
+go build -o bin/api ./cmd
 ./bin/api
 ```
 
