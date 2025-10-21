@@ -11,6 +11,12 @@ Responsive caregiver-facing web app built with React 19, TypeScript, Tailwind CS
 - **Axios** for API calls
 - **React Hot Toast** for feedback messages
 
+### Why these choices?
+
+- **React + Vite** keep development fast with instant HMR and TypeScript-first ergonomics.
+- **Tailwind CSS + DaisyUI** provide a component-friendly design language, speeding up styling without fighting custom CSS.
+- **React Query** offers resilient caching, background refetching, and mutation helpers ideal for the schedule/attendance workflows.
+
 ## Project Structure
 
 ```
@@ -30,6 +36,7 @@ frontend/
 
 - Node.js 20 (or 18+) and npm
 - Backend API running locally on `http://localhost:8080` (see [`../backend/README.md`](../backend/README.md))
+- Backend migrations executed so the seeded caregiver (`c2d1bb61-8d67-4db5-9e59-4c2c16f7d4f2`) and OAuth client (`caregiver-app`) exist. The default `.env` values assume those records.
 
 ## Quick start
 
@@ -72,3 +79,9 @@ The app attempts to grab device coordinates automatically. If access is denied o
 - `npm run lint` – ESLint (optional stricter rules can be enabled later).
 
 Feel free to adjust the environment values for deployed environments (e.g. pointing to a hosted backend). EOF
+
+## Assumptions
+
+- The UI mimics the provided designs, but some flows were implemented heuristically due to limited spec detail.
+- Seed data (caregiver, schedules, auth client) is expected to exist via backend migrations; the front-end `.env.example` mirrors those IDs.
+- Clock-out mutation is disabled temporarily until the backend flow is fully wired; UI elements exist in anticipation of the final API behavior.
