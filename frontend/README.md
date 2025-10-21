@@ -36,7 +36,7 @@ frontend/
 
 2. Create a `.env` (see `.env.example`):
    ```ini
-   VITE_API_BASE_URL=http://localhost:8080/api
+   VITE_API_URL=http://localhost:8080/api
    VITE_CLIENT_ID=caregiver-app
    VITE_CLIENT_SECRET=caregiver-secret
    VITE_DEFAULT_CAREGIVER_ID=c2d1bb61-8d67-4db5-9e59-4c2c16f7d4f2
